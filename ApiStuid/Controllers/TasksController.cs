@@ -23,18 +23,14 @@ namespace ApiStuid.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ModelsTask>>> GetTasks()
         {
-            return await _context.Tasks.Include(t => t.Subtasks)
-                                      .Include(t => t.ResponsibleUsers)
-                                      .ToListAsync();
+            return await _context.Tasks.ToListAsync();
         }
 
         // GET: api/Tasks/5
         [HttpGet("{id}")]
         public async Task<ActionResult<ModelsTask>> GetTask(int id)
         {
-            var task = await _context.Tasks.Include(t => t.Subtasks)
-                                           .Include(t => t.ResponsibleUsers)
-                                           .FirstOrDefaultAsync(t => t.Id == id);
+            var task = await _context.Tasks.FirstOrDefaultAsync(t => t.Id == id);
 
             if (task == null)
             {
@@ -42,15 +38,6 @@ namespace ApiStuid.Controllers
             }
 
             return task;
-        }
-
-        // GET: api/Tasks/project/5
-        [HttpGet("project/{projectId}")]
-        public async Task<ActionResult<IEnumerable<ModelsTask>>> GetTasksByProject(int projectId)
-        {
-            return await _context.Tasks.Where(t => t.ProjectId == projectId)
-                                      .Include(t => t.Subtasks)
-                                      .ToListAsync();
         }
 
         // POST: api/Tasks

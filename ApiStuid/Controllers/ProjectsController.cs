@@ -23,18 +23,14 @@ namespace ApiStuid.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Project>>> GetProjects()
         {
-            return await _context.Projects.Include(p => p.Participants)
-                                         .Include(p => p.Tasks)
-                                         .ToListAsync();
+            return await _context.Projects.ToListAsync();
         }
 
         // GET: api/Projects/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Project>> GetProject(int id)
         {
-            var project = await _context.Projects.Include(p => p.Participants)
-                                                .Include(p => p.Tasks)
-                                                .FirstOrDefaultAsync(p => p.Id == id);
+            var project = await _context.Projects.FirstOrDefaultAsync(p => p.Id == id);
 
             if (project == null)
             {

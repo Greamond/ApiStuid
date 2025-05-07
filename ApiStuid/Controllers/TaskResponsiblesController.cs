@@ -23,18 +23,14 @@ namespace ApiStuid.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TaskResponsible>>> GetTaskResponsibles()
         {
-            return await _context.TaskResponsibles.Include(tr => tr.User)
-                                                 .Include(tr => tr.Task)
-                                                 .ToListAsync();
+            return await _context.TaskResponsibles.ToListAsync();
         }
 
         // GET: api/TaskResponsibles/5
         [HttpGet("{id}")]
         public async Task<ActionResult<TaskResponsible>> GetTaskResponsible(int id)
         {
-            var taskResponsible = await _context.TaskResponsibles.Include(tr => tr.User)
-                                                                .Include(tr => tr.Task)
-                                                                .FirstOrDefaultAsync(tr => tr.Id == id);
+            var taskResponsible = await _context.TaskResponsibles.FirstOrDefaultAsync(x => x.Id == id);
 
             if (taskResponsible == null)
             {
@@ -44,14 +40,6 @@ namespace ApiStuid.Controllers
             return taskResponsible;
         }
 
-        // GET: api/TaskResponsibles/task/5
-        [HttpGet("task/{taskId}")]
-        public async Task<ActionResult<IEnumerable<TaskResponsible>>> GetResponsiblesByTask(int taskId)
-        {
-            return await _context.TaskResponsibles.Where(tr => tr.TaskId == taskId)
-                                                 .Include(tr => tr.User)
-                                                 .ToListAsync();
-        }
 
         // POST: api/TaskResponsibles
         [HttpPost]

@@ -1,4 +1,6 @@
-﻿namespace ApiStuid.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace ApiStuid.Models
 {
     public class Chapter
     {

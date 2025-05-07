@@ -23,18 +23,14 @@ namespace ApiStuid.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Participant>>> GetParticipants()
         {
-            return await _context.Participants.Include(p => p.User)
-                                             .Include(p => p.Project)
-                                             .ToListAsync();
+            return await _context.Participants.ToListAsync();
         }
 
         // GET: api/Participants/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Participant>> GetParticipant(int id)
         {
-            var participant = await _context.Participants.Include(p => p.User)
-                                                        .Include(p => p.Project)
-                                                        .FirstOrDefaultAsync(p => p.Id == id);
+            var participant = await _context.Participants.FirstOrDefaultAsync(p => p.Id == id);
 
             if (participant == null)
             {
@@ -48,9 +44,7 @@ namespace ApiStuid.Controllers
         [HttpGet("project/{projectId}")]
         public async Task<ActionResult<IEnumerable<Participant>>> GetParticipantsByProject(int projectId)
         {
-            return await _context.Participants.Where(p => p.ProjectId == projectId)
-                                             .Include(p => p.User)
-                                             .ToListAsync();
+            return await _context.Participants.Where(p => p.ProjectId == projectId).ToListAsync();
         }
 
         // POST: api/Participants
