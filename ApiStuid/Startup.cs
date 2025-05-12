@@ -38,7 +38,15 @@ namespace ApiStuid
                     options.JsonSerializerOptions.PropertyNamingPolicy = null;
                     options.JsonSerializerOptions.WriteIndented = true;
                 });
-
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", policy =>
+                {
+                    policy.AllowAnyOrigin()
+                         .AllowAnyMethod()
+                         .AllowAnyHeader();
+                });
+            });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -49,13 +57,13 @@ namespace ApiStuid
             }
 
             app.UseHttpsRedirection();
+            app.Use(async (context, next) =>
+            {
+                context.Request.Host = new HostString("localhost");
+                await next();
+            });
             app.UseRouting();
-
-            app.UseCors(builder => builder
-                .AllowAnyOrigin()
-                .AllowAnyMethod()
-                .AllowAnyHeader());
-
+            app.UseCors("AllowAll");
             app.UseAuthentication(); 
             app.UseAuthorization();
 
