@@ -30,8 +30,12 @@ namespace ApiStuid.Controllers
             // Здесь можно добавить генерацию JWT токена, если нужно
             return Ok(new AuthResponse
             {
-                UserId = user.Id,
-                Email = user.Email
+                EmployeeId = user.Id,
+                LastName = user.LastName,
+                FirstName = user.FirstName,
+                MiddleName = user.MiddleName,
+                Email = user.Email,
+                Description = user.Description
             });
         }
     }
@@ -44,7 +48,11 @@ namespace ApiStuid.Controllers
 
     public class AuthResponse
     {
-        public int UserId { get; set; }
+        public int EmployeeId { get; set; }
+        public string LastName { get; set; }
+        public string FirstName { get; set; }
+        public string MiddleName { get; set; }
         public string Email { get; set; }
+        public string Description { get; set; }
     }
 }
