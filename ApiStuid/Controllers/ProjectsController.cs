@@ -3,8 +3,11 @@ using ApiStuid.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace ApiStuid.Controllers
@@ -19,6 +22,36 @@ namespace ApiStuid.Controllers
         public ProjectsController(DatabaseContext context)
         {
             _context = context;
+        }
+
+        [Authorize]
+        [HttpPost("createProject")]
+        public async Task<ActionResult<Project>> CreateProject([FromBody] ProjectCreateRequest request)
+        {
+                // Получаем ID текущего пользователя из токена
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+                var project = new Project
+                {
+                    Name = request.Name,
+                    Description = request.Description,
+                    IsPublic = request.IsPublic,
+                    Creator = userId // Используем ID из токена
+                };
+
+                _context.Projects.Add(project);
+                await _context.SaveChangesAsync();
+
+                return CreatedAtAction(nameof(GetProject), new { id = project.Id }, project);
+        }
+
+        public class ProjectCreateRequest
+        {
+            public string Name { get; set; }
+
+            public string Description { get; set; }
+
+            public bool IsPublic { get; set; }
         }
 
         // GET: api/Projects
