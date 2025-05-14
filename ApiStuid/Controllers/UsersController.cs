@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace ApiStuid.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class UsersController : ControllerBase
@@ -27,7 +28,6 @@ namespace ApiStuid.Controllers
             return await _context.Users.ToListAsync();
         }
 
-        [Authorize]
         [HttpGet("employees")]
         public async Task<ActionResult<IEnumerable<EmployeeResponse>>> GetEmployees()
         {
