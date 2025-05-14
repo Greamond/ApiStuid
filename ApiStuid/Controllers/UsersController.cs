@@ -1,5 +1,6 @@
 ﻿using ApiStuid.DbWork;
 using ApiStuid.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
@@ -24,6 +25,33 @@ namespace ApiStuid.Controllers
         public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
             return await _context.Users.ToListAsync();
+        }
+
+        [Authorize]
+        [HttpGet("employees")]
+        public async Task<ActionResult<IEnumerable<EmployeeResponse>>> GetEmployees()
+        {
+            return await _context.Users
+                .Select(u => new EmployeeResponse
+                {
+                    EmployeeId = u.Id,
+                    LastName = u.LastName,
+                    FirstName = u.FirstName,
+                    MiddleName = u.MiddleName,
+                    Email = u.Email,
+                    Description = u.Description
+                })
+                .ToListAsync();
+        }
+
+        public class EmployeeResponse
+        {
+            public int EmployeeId { get; set; }
+            public string LastName { get; set; }
+            public string FirstName { get; set; }
+            public string MiddleName { get; set; }
+            public string Email { get; set; }
+            public string Description { get; set; }
         }
 
         // GET: api/Users/5
