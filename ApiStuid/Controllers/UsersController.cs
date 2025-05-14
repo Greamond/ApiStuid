@@ -3,6 +3,7 @@ using ApiStuid.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -54,6 +55,51 @@ namespace ApiStuid.Controllers
             public string Description { get; set; }
         }
 
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateUser(int id, [FromBody] UserUpdateRequest request)
+        {
+            try
+            {
+                var user = await _context.Users.FindAsync(id);
+                if (user == null)
+                {
+                    return NotFound(new { success = false, message = "User not found" });
+                }
+
+                // Обновление полей
+                user.LastName = request.LastName;
+                user.FirstName = request.FirstName;
+                user.MiddleName = request.MiddleName;
+                user.Description = request.Description;
+
+                await _context.SaveChangesAsync();
+
+                // Явно возвращаем JSON с успешным статусом
+                return Ok(new
+                {
+                    success = true,
+                    message = "Profile updated successfully"
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "Update failed",
+                    error = ex.Message
+                });
+            }
+        }
+
+        public class UserUpdateRequest
+        {
+            public string LastName { get; set; }
+            public string FirstName { get; set; }
+            public string MiddleName { get; set; }
+            public string Description { get; set; }
+        }
+
         // GET: api/Users/5
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> GetUser(int id)
@@ -76,36 +122,6 @@ namespace ApiStuid.Controllers
             await _context.SaveChangesAsync();
 
             return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
-        }
-
-        // PUT: api/Users/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(int id, User user)
-        {
-            if (id != user.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(user).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!UserExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
         }
 
         // DELETE: api/Users/5
