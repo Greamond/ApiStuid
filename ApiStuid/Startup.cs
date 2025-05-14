@@ -1,4 +1,6 @@
+using ApiStuid.Classes;
 using ApiStuid.DbWork;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -9,9 +11,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace ApiStuid
@@ -30,6 +34,30 @@ namespace ApiStuid
             // Добавляем контекст базы данных
             services.AddDbContext<DatabaseContext>();
 
+            // Добавляем JwtService
+            services.AddSingleton<JwtService>();
+
+            // Настройка JWT аутентификации
+            var jwtKey = Configuration["Jwt:Key"];
+            var jwtIssuer = Configuration["Jwt:Issuer"];
+            var jwtAudience = Configuration["Jwt:Audience"];
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = jwtIssuer,
+                        ValidAudience = jwtAudience,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+                        ClockSkew = TimeSpan.Zero // Убираем запас времени для expiration
+                    };
+                });
+
             // Добавляем контроллеры
             services.AddControllers()
                 .AddJsonOptions(options =>
@@ -38,6 +66,7 @@ namespace ApiStuid
                     options.JsonSerializerOptions.PropertyNamingPolicy = null;
                     options.JsonSerializerOptions.WriteIndented = true;
                 });
+
             services.AddCors(options =>
             {
                 options.AddPolicy("AllowAll", policy =>
