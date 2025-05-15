@@ -100,6 +100,50 @@ namespace ApiStuid.Controllers
             public string Description { get; set; }
         }
 
+        [HttpPut("{id}/photo")]
+        public async Task<IActionResult> UpdateUserPhoto(int id, [FromBody] UserPhotoUpdateRequest request)
+        {
+            try
+            {
+                var user = await _context.Users.FindAsync(id);
+                if (user == null)
+                {
+                    return NotFound(new { success = false, message = "User not found" });
+                }
+
+                // Конвертируем Base64 в byte[]
+                if (!string.IsNullOrEmpty(request.Photo))
+                {
+                    user.Photo = Convert.FromBase64String(request.Photo);
+                }
+
+                await _context.SaveChangesAsync();
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "Photo updated successfully"
+                });
+            }
+            catch (FormatException)
+            {
+                return BadRequest(new { success = false, message = "Invalid photo format" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
+
+        public class UserPhotoUpdateRequest
+        {
+            public string Photo { get; set; }
+        }
+
         // GET: api/Users/5
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> GetUser(int id)
@@ -114,35 +158,20 @@ namespace ApiStuid.Controllers
             return user;
         }
 
-        // POST: api/Users
-        [HttpPost]
-        public async Task<ActionResult<User>> PostUser(User user)
-        {
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
-        }
-
-        // DELETE: api/Users/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser(int id)
+        [HttpGet("{id}/photo")]
+        public async Task<IActionResult> GetUserPhoto(int id)
         {
             var user = await _context.Users.FindAsync(id);
-            if (user == null)
+            if (user == null || user.Photo == null)
             {
-                return NotFound();
+                return NotFound(new { success = false, message = "Photo not found" });
             }
 
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool UserExists(int id)
-        {
-            return _context.Users.Any(e => e.Id == id);
+            return Ok(new
+            {
+                success = true,
+                photo = Convert.ToBase64String(user.Photo)
+            });
         }
     }
 }
