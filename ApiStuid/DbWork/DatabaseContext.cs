@@ -1,6 +1,7 @@
 ﻿using ApiStuid.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
+using static ApiStuid.Controllers.AuthController;
 
 namespace ApiStuid.DbWork
 {
@@ -13,10 +14,18 @@ namespace ApiStuid.DbWork
         public DbSet<Chapter> Chapters { get; set; }
         public DbSet<Participant> Participants { get; set; }
         public DbSet<TaskResponsible> TaskResponsibles { get; set; }
+        public DbSet<LoginResult> LoginResults => Set<LoginResult>();
 
         public DatabaseContext()
         {
-            Database.EnsureCreated();
+            try
+            {
+                Database.EnsureCreated();
+            }
+            catch (Exception ex)
+            {
+
+            }
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -28,6 +37,13 @@ namespace ApiStuid.DbWork
                     new MySqlServerVersion(new Version(8, 0, 11))
                 );
             }
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<LoginResult>().HasNoKey().ToView(null);
         }
     }
 }

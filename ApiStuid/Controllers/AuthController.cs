@@ -3,8 +3,12 @@ using ApiStuid.DbWork;
 using ApiStuid.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MySqlConnector;
 using System;
+using System.Data;
 using System.Diagnostics;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ApiStuid.Controllers
@@ -23,16 +27,35 @@ namespace ApiStuid.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<AuthResponse>> Login([FromBody] LoginRequest request)
+        public async Task<ActionResult<AuthResponse>> Login([FromBody] LoginRequest request, CancellationToken ct = default)
         {
-            var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.Email == request.Email && u.Password == request.Password);
+            var emailParam = new MySqlParameter("@p_email", request.Email);
+            var passwordParam = new MySqlParameter("@p_password", request.Password);
 
-            if (user == null)
+            var sql = "CALL VerifyUserPassword(@p_email, @p_password)";
+
+            var results = await _context.LoginResults
+                .FromSqlRaw(sql, emailParam, passwordParam)
+                .ToListAsync(ct); // Загружаем всё в список
+
+            var result = results.FirstOrDefault(); // Обрабатываем в памяти
+
+            if (result == null || !result.IsValid || result.UserId == null)
                 return Unauthorized("Invalid credentials");
 
+            var userId = result.UserId.Value;
+
+            var user = await _context.Users.FindAsync(new object[] { userId }, ct);
+
+            if (user == null)
+                return Unauthorized("User not found");
+
+            // Обновление времени последней активности
+            user.LastActivity = DateTime.UtcNow;
+            await _context.SaveChangesAsync(ct);
+
             // Генерация токена
-            var token = _jwtService.GenerateToken(user); 
+            var token = _jwtService.GenerateToken(user);
 
             return Ok(new AuthResponse
             {
@@ -50,6 +73,12 @@ namespace ApiStuid.Controllers
         {
             public string Email { get; set; }
             public string Password { get; set; }
+        }
+
+        public class LoginResult
+        {
+            public bool IsValid { get; set; }
+            public int? UserId { get; set; }
         }
 
         public class AuthResponse
@@ -85,9 +114,12 @@ namespace ApiStuid.Controllers
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
+            var token = _jwtService.GenerateToken(user);
+
             // Return similar response to login
             return Ok(new AuthResponse
             {
+                Token = token,
                 EmployeeId = user.Id,
                 LastName = user.LastName,
                 FirstName = user.FirstName,

@@ -103,8 +103,15 @@ namespace ApiStuid
 
             using (var scope = app.ApplicationServices.CreateScope())
             {
-                var dbContext = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
-                dbContext.Database.EnsureCreated();
+                try
+                {
+                    var dbContext = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
+                    dbContext.Database.EnsureCreated();
+                }
+                catch (Exception ex)
+                {
+
+                }
             }
         }
     }

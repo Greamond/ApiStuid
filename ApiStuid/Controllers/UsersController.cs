@@ -40,7 +40,8 @@ namespace ApiStuid.Controllers
                     FirstName = u.FirstName,
                     MiddleName = u.MiddleName,
                     Email = u.Email,
-                    Description = u.Description
+                    Description = u.Description,
+                    Photo = u.Photo != null ? Convert.ToBase64String(u.Photo) : null
                 })
                 .ToListAsync();
         }
@@ -53,6 +54,7 @@ namespace ApiStuid.Controllers
             public string MiddleName { get; set; }
             public string Email { get; set; }
             public string Description { get; set; }
+            public string Photo { get; set; }
         }
 
         [HttpPut("{id}")]
