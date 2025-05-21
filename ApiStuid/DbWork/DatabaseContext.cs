@@ -24,7 +24,7 @@ namespace ApiStuid.DbWork
             }
             catch (Exception ex)
             {
-
+                Console.WriteLine(ex.ToString());
             }
         }
 
@@ -44,6 +44,10 @@ namespace ApiStuid.DbWork
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<LoginResult>().HasNoKey().ToView(null);
+            modelBuilder.Entity<Participant>()
+                .HasOne(p => p.User)
+                .WithMany()
+                .HasForeignKey(p => p.UserId);
         }
     }
 }
