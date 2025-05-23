@@ -160,6 +160,40 @@ namespace ApiStuid.Controllers
             public bool IsPublic { get; set; }
         }
 
+        // GET: api/Projects/forUser/5
+        [HttpGet("forUser/{userId}")]
+        public async Task<ActionResult<IEnumerable<Project>>> GetProjectsForUser(int userId)
+        {
+            // Получаем все публичные проекты
+            var publicProjects = await _context.Projects
+                .Where(p => p.IsPublic)
+                .ToListAsync();
+
+            // Получаем проекты, где пользователь является создателем
+            var userCreatedProjects = await _context.Projects
+                .Where(p => p.Creator == userId)
+                .ToListAsync();
+
+            // Получаем проекты, где пользователь является участником
+            var userParticipantProjects = await _context.Projects
+                .Join(_context.Participants,
+                    p => p.Id,
+                    part => part.ProjectId,
+                    (p, part) => new { Project = p, Participant = part })
+                .Where(x => x.Participant.UserId == userId)
+                .Select(x => x.Project)
+                .ToListAsync();
+
+            // Объединяем и устраняем дубликаты
+            var allProjects = publicProjects
+                .Union(userCreatedProjects)
+                .Union(userParticipantProjects)
+                .Distinct()
+                .ToList();
+
+            return allProjects;
+        }
+
         private bool ProjectExists(int id)
         {
             return _context.Projects.Any(e => e.Id == id);
