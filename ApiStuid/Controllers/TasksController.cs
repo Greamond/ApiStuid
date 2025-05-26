@@ -52,12 +52,27 @@ namespace ApiStuid.Controllers
         [HttpPost]
         public async Task<ActionResult<ModelsTask>> PostTask([FromBody] TaskCreateRequest request)
         {
+            // Проверяем существование пользователя
+            var creatorExists = await _context.Users.AnyAsync(u => u.Id == request.CreatorId);
+            if (!creatorExists)
+            {
+                return BadRequest("Указанный создатель не существует");
+            }
+
+            // Проверяем существование проекта
+            var projectExists = await _context.Projects.AnyAsync(p => p.Id == request.ProjectId);
+            if (!projectExists)
+            {
+                return BadRequest("Указанный проект не существует");
+            }
+
             var task = new ModelsTask
             {
                 Name = request.Name,
                 Description = request.Description,
                 ProjectId = request.ProjectId,
-                Chapter = 1
+                Chapter = 1,
+                CreatorId = request.CreatorId,
             };
 
             _context.Tasks.Add(task);
@@ -87,6 +102,96 @@ namespace ApiStuid.Controllers
             public int ProjectId { get; set; }
             public int ChapterId { get; set; }
             public List<int> AssigneeIds { get; set; }
+            public int CreatorId { get; set; }
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateTask(int id, [FromBody] TaskUpdateRequest request)
+        {
+            var task = await _context.Tasks.FindAsync(id);
+            if (task == null)
+            {
+                return NotFound();
+            }
+
+            // Обновляем основные поля
+            task.Name = request.Name ?? task.Name;
+            task.Description = request.Description ?? task.Description;
+            task.Chapter = request.ChapterId;
+
+            // Обновляем ответственных
+            if (request.AssigneeIds != null)
+            {
+                // Удаляем старых ответственных
+                var existingResponsibles = await _context.TaskResponsibles
+                    .Where(tr => tr.TaskId == id)
+                    .ToListAsync();
+
+                _context.TaskResponsibles.RemoveRange(existingResponsibles);
+
+                // Добавляем новых
+                foreach (var assigneeId in request.AssigneeIds)
+                {
+                    _context.TaskResponsibles.Add(new TaskResponsible
+                    {
+                        TaskId = id,
+                        UserId = assigneeId
+                    });
+                }
+            }
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!TaskExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return Ok(task);
+        }
+
+        public class TaskUpdateRequest
+        {
+            public string? Name { get; set; }
+            public string? Description { get; set; }
+            public int ChapterId { get; set; }
+            public List<int>? AssigneeIds { get; set; }
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteTask(int id)
+        {
+            var task = await _context.Tasks.FindAsync(id);
+            if (task == null)
+            {
+                return NotFound();
+            }
+
+            // Удаляем связанных ответственных
+            var responsibles = await _context.TaskResponsibles
+                .Where(tr => tr.TaskId == id)
+                .ToListAsync();
+
+            _context.TaskResponsibles.RemoveRange(responsibles);
+            _context.Tasks.Remove(task);
+
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        private bool TaskExists(int id)
+        {
+            return _context.Tasks.Any(e => e.Id == id);
         }
     }
 }

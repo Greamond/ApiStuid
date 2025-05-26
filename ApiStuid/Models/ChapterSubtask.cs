@@ -2,7 +2,8 @@
 
 namespace ApiStuid.Models
 {
-    public class Chapter
+    [Table("chapters_subtask")]
+    public class ChapterSubtask
     {
         public int Id { get; set; }
         public string Name { get; set; }

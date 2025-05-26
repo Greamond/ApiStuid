@@ -19,6 +19,40 @@ namespace ApiStuid.Controllers
             _context = context;
         }
 
+        // GET: api/TaskResponsibles/task/5 - Получить всех ответственных для задачи
+        [HttpGet("task/{taskId}")]
+        public async Task<ActionResult<IEnumerable<Employee>>> GetAssigneesForTask(int taskId)
+        {
+            var assignees = await _context.TaskResponsibles
+                .Where(tr => tr.TaskId == taskId)
+                .Join(_context.Users,
+                    tr => tr.UserId,
+                    u => u.Id,
+                    (tr, u) => new Employee
+                    {
+                        EmployeeId = u.Id,
+                        FirstName = u.FirstName,
+                        LastName = u.LastName,
+                        MiddleName = u.MiddleName,
+                    })
+                .ToListAsync();
+
+            if (!assignees.Any())
+            {
+                return NotFound();
+            }
+
+            return assignees;
+        }
+
+        public class Employee
+        {
+            public int EmployeeId { get; set; }
+            public string FirstName { get; set; }
+            public string LastName { get; set; }
+            public string MiddleName { get; set; }
+        }
+
         // GET: api/TaskResponsibles
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TaskResponsible>>> GetTaskResponsibles()

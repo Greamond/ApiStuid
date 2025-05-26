@@ -11,7 +11,8 @@ namespace ApiStuid.DbWork
         public DbSet<Project> Projects { get; set; }
         public DbSet<Task> Tasks { get; set; }
         public DbSet<Subtask> Subtasks { get; set; }
-        public DbSet<Chapter> Chapters { get; set; }
+        public DbSet<ChapterTask> ChaptersTask { get; set; }
+        public DbSet<ChapterSubtask> ChaptersSubtask { get; set; }
         public DbSet<Participant> Participants { get; set; }
         public DbSet<TaskResponsible> TaskResponsibles { get; set; }
         public DbSet<LoginResult> LoginResults => Set<LoginResult>();
