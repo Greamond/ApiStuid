@@ -176,14 +176,7 @@ namespace ApiStuid.Controllers
                 return NotFound();
             }
 
-            // Удаляем связанных ответственных
-            var responsibles = await _context.TaskResponsibles
-                .Where(tr => tr.TaskId == id)
-                .ToListAsync();
-
-            _context.TaskResponsibles.RemoveRange(responsibles);
             _context.Tasks.Remove(task);
-
             await _context.SaveChangesAsync();
 
             return NoContent();
