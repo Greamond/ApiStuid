@@ -7,9 +7,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using ModelsTask = ApiStuid.Models.Task;
 using ApiStuid.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace ApiStuid.Controllers
 {
+
     [ApiController]
     [Route("api/[controller]")]
     public class TasksController : ControllerBase
@@ -71,7 +73,7 @@ namespace ApiStuid.Controllers
                 Name = request.Name,
                 Description = request.Description,
                 ProjectId = request.ProjectId,
-                Chapter = 1,
+                Chapter = request.ChapterId,
                 CreatorId = request.CreatorId,
             };
 
@@ -180,6 +182,32 @@ namespace ApiStuid.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+
+
+        [HttpPut("{id}/status")]
+        public async Task<IActionResult> UpdateTaskStatus(int id, [FromBody] TaskStatusUpdateRequest request)
+        {
+            if (request == null || request.ChapterId <= 0)
+            {
+                return BadRequest("Invalid ChapterId");
+            }
+
+            var task = await _context.Tasks.FindAsync(id);
+            if (task == null)
+            {
+                return NotFound();
+            }
+
+            task.Chapter = request.ChapterId;
+            await _context.SaveChangesAsync();
+
+            return Ok();
+        }
+
+        public class TaskStatusUpdateRequest
+        {
+            public int ChapterId { get; set; }
         }
 
         private bool TaskExists(int id)
