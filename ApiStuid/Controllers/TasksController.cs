@@ -8,10 +8,11 @@ using System.Threading.Tasks;
 using ModelsTask = ApiStuid.Models.Task;
 using ApiStuid.Models;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ApiStuid.Controllers
 {
-
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class TasksController : ControllerBase
@@ -75,6 +76,7 @@ namespace ApiStuid.Controllers
                 ProjectId = request.ProjectId,
                 Chapter = request.ChapterId,
                 CreatorId = request.CreatorId,
+                Position = request.Position
             };
 
             _context.Tasks.Add(task);
@@ -105,6 +107,7 @@ namespace ApiStuid.Controllers
             public int ChapterId { get; set; }
             public List<int> AssigneeIds { get; set; }
             public int CreatorId { get; set; }
+            public int Position { get; set; }
         }
 
         [HttpPut("{id}")]
@@ -208,6 +211,57 @@ namespace ApiStuid.Controllers
         public class TaskStatusUpdateRequest
         {
             public int ChapterId { get; set; }
+        }
+
+        [HttpPut("update-order")]
+        public async Task<IActionResult> UpdateTaskOrder([FromBody] UpdateTaskOrderRequest request)
+        {
+            if (request == null || request.TaskOrder == null || !request.TaskOrder.Any())
+            {
+                return BadRequest("Invalid request data");
+            }
+
+            var taskIds = request.TaskOrder.Select(t => t.TaskId).ToList();
+            var tasks = await _context.Tasks
+                .Where(t => taskIds.Contains(t.Id) && t.ProjectId == request.ProjectId)
+                .ToListAsync();
+
+            if (tasks.Count != taskIds.Count)
+            {
+                return BadRequest("Some tasks do not belong to the specified project");
+            }
+
+            foreach (var item in request.TaskOrder)
+            {
+                var task = tasks.FirstOrDefault(t => t.Id == item.TaskId);
+                if (task != null)
+                {
+                    task.Position = item.Position;
+                }
+            }
+
+            try
+            {
+                await _context.SaveChangesAsync();
+                return Ok();
+            }
+            catch (System.Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        public class UpdateTaskOrderRequest
+        {
+            public int ProjectId { get; set; }
+            public int ColumnId { get; set; }
+            public List<TaskOrderItem> TaskOrder { get; set; }
+        }
+
+        public class TaskOrderItem
+        {
+            public int TaskId { get; set; }
+            public int Position { get; set; }
         }
 
         private bool TaskExists(int id)

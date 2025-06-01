@@ -12,6 +12,7 @@ namespace ApiStuid.Models
         public int Responsible { get; set; }
         [Column("chapter_id")]
         public int ChapterId { get; set; }
+        public int Position { get; set; }
 
     }
 }

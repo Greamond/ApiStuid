@@ -17,5 +17,6 @@ namespace ApiStuid.Models
         public int Chapter { get; set; }
         [Column("creator_id")]
         public int CreatorId { get; set; }
+        public int Position { get; set; }
     }
 }

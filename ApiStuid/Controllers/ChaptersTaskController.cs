@@ -1,5 +1,6 @@
 ﻿using ApiStuid.DbWork;
 using ApiStuid.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace ApiStuid.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class ChaptersTaskController : ControllerBase
@@ -94,6 +96,21 @@ namespace ApiStuid.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+
+        [HttpGet("project/{projectId}")]
+        public async Task<ActionResult<IEnumerable<ChapterTask>>> GetChaptersByProject(int projectId)
+        {
+            var chapters = await _context.ChaptersTask
+                .Where(c => c.ProjectId == projectId)
+                .ToListAsync();
+
+            if (chapters == null || !chapters.Any())
+            {
+                return NotFound("Нет колонок для этого проекта");
+            }
+
+            return chapters;
         }
 
         private bool ChapterExists(int id)
