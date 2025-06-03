@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace ApiStuid.Controllers
 {
-    [Authorize]
+    [Authorize]   
     [ApiController]
     [Route("api/[controller]")]
     public class TasksController : ControllerBase
@@ -50,6 +50,20 @@ namespace ApiStuid.Controllers
             return await _context.Tasks
                 .Where(t => t.ProjectId == projectId)
                 .ToListAsync();
+        }
+
+        [HttpGet("assignee/{assigneeId}")]
+        public async Task<ActionResult<IEnumerable<ModelsTask>>> GetTasksByAssignee(int assigneeId)
+        {
+            var responsibles = await _context.TaskResponsibles.Where(r => r.UserId == assigneeId).Select(r => r.TaskId).ToListAsync();
+            var tasks = await _context.Tasks.Where(t => responsibles.Contains(t.Id) || t.CreatorId == assigneeId).ToListAsync();
+
+            if (!tasks.Any())
+            {
+                return NotFound("Задач нет");
+            }
+
+            return Ok(tasks);
         }
 
         [HttpPost]
