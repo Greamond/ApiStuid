@@ -54,32 +54,26 @@ namespace ApiStuid.Controllers
 
         // PUT: api/Chapters/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutChapter(int id, ChapterTask chapter)
+        public async Task<IActionResult> UpdateChapter(int id, ChapterTask chapter)
         {
             if (id != chapter.Id)
-            {
                 return BadRequest();
-            }
 
-            _context.Entry(chapter).State = EntityState.Modified;
+            var existing = await _context.ChaptersTask.FindAsync(id);
+            if (existing == null)
+                return NotFound();
+
+            existing.Name = chapter.Name;
 
             try
             {
                 await _context.SaveChangesAsync();
+                return Ok(existing);
             }
-            catch (DbUpdateConcurrencyException)
+            catch
             {
-                if (!ChapterExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return StatusCode(500, "Ошибка сохранения");
             }
-
-            return NoContent();
         }
 
         // DELETE: api/Chapters/5
@@ -88,9 +82,7 @@ namespace ApiStuid.Controllers
         {
             var chapter = await _context.ChaptersTask.FindAsync(id);
             if (chapter == null)
-            {
                 return NotFound();
-            }
 
             _context.ChaptersTask.Remove(chapter);
             await _context.SaveChangesAsync();
