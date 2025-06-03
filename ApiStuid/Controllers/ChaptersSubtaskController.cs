@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -55,32 +56,40 @@ namespace ApiStuid.Controllers
 
         // PUT: api/Chapters/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutChapter(int id, ChapterSubtask chapter)
+        public async Task<IActionResult> UpdateSubtaskColumn(int id, [FromBody] UpdateChapterDto chapters)
         {
-            if (id != chapter.Id)
+            var existing = await _context.ChaptersSubtask.FindAsync(id);
+
+            if (existing == null)
             {
-                return BadRequest();
+                return NotFound(new { Message = "Колонка не найдена" });
             }
 
-            _context.Entry(chapter).State = EntityState.Modified;
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            existing.Name = chapters.Name;
 
             try
             {
                 await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ChapterExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
 
-            return NoContent();
+                // Возвращаем обновлённую колонку
+                return Ok(existing);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = "Ошибка при сохранении изменений", Error = ex.Message });
+            }
+        }
+
+        public class UpdateChapterDto
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public int TaskId { get; set; }
         }
 
         // DELETE: api/Chapters/5
@@ -100,7 +109,7 @@ namespace ApiStuid.Controllers
         }
 
         [HttpGet("task/{taskId}")]
-        public async Task<ActionResult<IEnumerable<ChapterSubtask>>> GetChaptersByProject(int taskId)
+        public async Task<ActionResult<IEnumerable<ChapterSubtask>>> GetChaptersByTask(int taskId)
         {
             var chapters = await _context.ChaptersSubtask
                 .Where(c => c.TaskId == taskId)
