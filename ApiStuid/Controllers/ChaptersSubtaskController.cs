@@ -99,6 +99,21 @@ namespace ApiStuid.Controllers
             return NoContent();
         }
 
+        [HttpGet("task/{taskId}")]
+        public async Task<ActionResult<IEnumerable<ChapterSubtask>>> GetChaptersByProject(int taskId)
+        {
+            var chapters = await _context.ChaptersSubtask
+                .Where(c => c.TaskId == taskId)
+                .ToListAsync();
+
+            if (chapters == null || !chapters.Any())
+            {
+                return NotFound("Нет колонок для этой задачи");
+            }
+
+            return chapters;
+        }
+
         private bool ChapterExists(int id)
         {
             return _context.ChaptersSubtask.Any(e => e.Id == id);

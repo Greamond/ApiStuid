@@ -10,6 +10,8 @@ namespace ApiStuid.Models
         public string Name { get; set; }
         public string Description { get; set; }
         public int Responsible { get; set; }
+        [Column("creator_id")]
+        public int CreatorId { get; set; }
         [Column("chapter_id")]
         public int ChapterId { get; set; }
         public int Position { get; set; }
