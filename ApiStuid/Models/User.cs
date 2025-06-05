@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ApiStuid.Models
 {
@@ -12,6 +14,7 @@ namespace ApiStuid.Models
         public string MiddleName { get; set; }
         public string Description { get; set; }
         public byte[] Photo { get; set; }
+        [Column("last_activity")]
         public DateTime? LastActivity { get; set; }
     }
 }

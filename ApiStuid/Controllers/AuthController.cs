@@ -3,6 +3,7 @@ using ApiStuid.DbWork;
 using ApiStuid.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using MySqlConnector;
 using System;
 using System.Data;
@@ -19,11 +20,19 @@ namespace ApiStuid.Controllers
     {
         private readonly DatabaseContext _context;
         private readonly JwtService _jwtService;
+        private readonly IEmailService _emailService;
+        private readonly ILogger<AuthController> _logger;
 
-        public AuthController(DatabaseContext context, JwtService jwtService)
+        public AuthController(
+            DatabaseContext context,
+            JwtService jwtService,
+            IEmailService emailService,
+            ILogger<AuthController> logger)
         {
             _context = context;
             _jwtService = jwtService;
+            _emailService = emailService;
+            _logger = logger;
         }
 
         [HttpPost("login")]
@@ -136,6 +145,59 @@ namespace ApiStuid.Controllers
             public string MiddleName { get; set; }
             public string Email { get; set; }
             public string Password { get; set; }
+        }
+
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request, CancellationToken ct = default)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == request.Email, ct);
+
+            if (user == null)
+            {
+                return Ok(new { Message = "Если email зарегистрирован, код отправлен" });
+            }
+
+            try
+            {
+                await _emailService.SendPasswordResetCodeAsync(user.Email, request.Code);
+
+                return Ok(new { Message = "Код подтверждения отправлен на email" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ошибка при отправке кода");
+                return StatusCode(500, "Ошибка при отправке кода");
+            }
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u =>
+                u.Email == request.Email);
+
+            if (user == null)
+            {
+                return BadRequest("Неверный или просроченный код");
+            }
+            
+            user.Password = request.NewPassword;
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { Message = "Пароль успешно изменён" });
+        }
+
+        public class ForgotPasswordRequest
+        {
+            public string Email { get; set; }
+            public int Code { get; set; }
+        }
+
+        public class ResetPasswordRequest
+        {
+            public string Email { get; set; }
+            public string NewPassword { get; set; }
         }
     }
 }

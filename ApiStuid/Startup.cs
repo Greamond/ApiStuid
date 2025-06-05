@@ -34,6 +34,8 @@ namespace ApiStuid
             // Добавляем контекст базы данных
             services.AddDbContext<DatabaseContext>();
 
+            services.AddScoped<IEmailService, EmailService>();
+
             // Добавляем JwtService
             services.AddSingleton<JwtService>();
 
