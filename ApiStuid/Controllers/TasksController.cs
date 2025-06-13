@@ -96,6 +96,23 @@ namespace ApiStuid.Controllers
             _context.Tasks.Add(task);
             await _context.SaveChangesAsync();
 
+            _context.ChaptersSubtask.Add(new ChapterSubtask
+            {
+                Name = "Новые",
+                TaskId = task.Id
+            });
+            _context.ChaptersSubtask.Add(new ChapterSubtask
+            {
+                Name = "В работе",
+                TaskId = task.Id
+            });
+            _context.ChaptersSubtask.Add(new ChapterSubtask
+            {
+                Name = "Выполненные",
+                TaskId = task.Id
+            });
+            await _context.SaveChangesAsync();
+
             // Добавляем ответственных
             if (request.AssigneeIds != null)
             {
