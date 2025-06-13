@@ -28,21 +28,37 @@ namespace ApiStuid.Controllers
         [HttpPost("createProject")]
         public async Task<ActionResult<Project>> CreateProject([FromBody] ProjectCreateRequest request)
         {
-                // Получаем ID текущего пользователя из токена
-                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            // Получаем ID текущего пользователя из токена
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
-                var project = new Project
-                {
-                    Name = request.Name,
-                    Description = request.Description,
-                    IsPublic = request.IsPublic,
-                    Creator = userId // Используем ID из токена
-                };
+            var project = new Project
+            {
+                Name = request.Name,
+                Description = request.Description,
+                IsPublic = request.IsPublic,
+                Creator = userId // Используем ID из токена
+            };
 
-                _context.Projects.Add(project);
-                await _context.SaveChangesAsync();
+            _context.Projects.Add(project);
+            await _context.SaveChangesAsync();
+            _context.ChaptersTask.Add(new ChapterTask
+            {
+                Name = "Новые",
+                ProjectId = project.Id
+            });
+            _context.ChaptersTask.Add(new ChapterTask
+            {
+                Name = "В работе",
+                ProjectId = project.Id
+            });
+            _context.ChaptersTask.Add(new ChapterTask
+            {
+                Name = "Выполненные",
+                ProjectId = project.Id
+            });
+            await _context.SaveChangesAsync();
 
-                return CreatedAtAction(nameof(GetProject), new { id = project.Id }, project);
+            return CreatedAtAction(nameof(GetProject), new { id = project.Id }, project);
         }
 
         public class ProjectCreateRequest
