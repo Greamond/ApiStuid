@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Хост: 127.0.0.1:3306
--- Время создания: Июн 03 2025 г., 04:27
+-- Время создания: Июн 15 2025 г., 00:21
 -- Версия сервера: 8.0.30
 -- Версия PHP: 7.2.34
 
@@ -65,9 +65,19 @@ CREATE TABLE `chapters_subtask` (
 --
 
 INSERT INTO `chapters_subtask` (`id`, `task_id`, `name`) VALUES
-(1, 48, 'ttt'),
-(2, 48, 'yrty'),
-(3, 49, 'hfgh');
+(19, 83, 'Формы'),
+(20, 83, 'Таблицы'),
+(21, 84, 'Диаграммы'),
+(22, 85, 'Тесты регистрации'),
+(23, 86, 'Цвета'),
+(24, 87, 'Авторизация'),
+(26, 88, 'Яп'),
+(28, 91, 'Новые'),
+(29, 91, 'В работе'),
+(30, 91, 'Выполненные'),
+(31, 92, 'Новые'),
+(32, 92, 'В работе'),
+(33, 92, 'Выполненные');
 
 -- --------------------------------------------------------
 
@@ -86,10 +96,26 @@ CREATE TABLE `chapters_task` (
 --
 
 INSERT INTO `chapters_task` (`id`, `project_id`, `name`) VALUES
-(8, 22, 'New'),
-(9, 22, 'new 2'),
-(10, 24, 'fgdfg'),
-(11, 24, 'gggg');
+(26, 34, 'Планирование'),
+(27, 34, 'Анализ'),
+(28, 34, 'Разработка'),
+(29, 35, 'Подготовка тестов'),
+(30, 35, 'Баг-репорты'),
+(31, 36, 'Макеты'),
+(32, 36, 'Цветовая палитра'),
+(33, 37, 'API'),
+(34, 37, 'Базы данных'),
+(35, 38, 'Верстка'),
+(36, 38, 'JS логика'),
+(39, 41, 'Новые'),
+(40, 41, 'В работе'),
+(41, 41, 'Выполненные'),
+(42, 42, 'Новые'),
+(43, 42, 'В работе'),
+(44, 42, 'Выполненные'),
+(45, 43, 'Новые'),
+(46, 43, 'В работе'),
+(47, 43, 'Выполненные');
 
 -- --------------------------------------------------------
 
@@ -108,12 +134,20 @@ CREATE TABLE `participants` (
 --
 
 INSERT INTO `participants` (`id`, `project_id`, `user_id`) VALUES
-(15, 16, 26),
-(22, 20, 26),
-(23, 20, 25),
-(24, 22, 26),
-(26, 24, 27),
-(27, 24, 26);
+(36, 34, 34),
+(37, 34, 35),
+(38, 34, 36),
+(39, 35, 37),
+(40, 35, 38),
+(41, 36, 34),
+(42, 36, 35),
+(43, 37, 36),
+(44, 37, 37),
+(45, 38, 38),
+(46, 38, 34),
+(47, 41, 35),
+(48, 41, 36),
+(49, 41, 38);
 
 -- --------------------------------------------------------
 
@@ -126,19 +160,23 @@ CREATE TABLE `projects` (
   `name` varchar(100) NOT NULL,
   `description` text NOT NULL,
   `is_public` tinyint(1) NOT NULL,
-  `creator` int NOT NULL
+  `creator` int NOT NULL,
+  `is_archive` tinyint(1) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Дамп данных таблицы `projects`
 --
 
-INSERT INTO `projects` (`id`, `name`, `description`, `is_public`, `creator`) VALUES
-(16, 'test', 'tested', 0, 27),
-(20, 'T', 't', 0, 28),
-(21, 'G', 'g', 1, 28),
-(22, 'Te', 'te', 0, 25),
-(24, 'Hhh', 'hhh', 0, 25);
+INSERT INTO `projects` (`id`, `name`, `description`, `is_public`, `creator`, `is_archive`) VALUES
+(34, 'Проект Альфа', 'Разработка MVP продукта', 1, 34, 0),
+(35, 'Проект Бета', 'Тестирование и багфиксы', 0, 35, 0),
+(36, 'Проект Гамма', 'UX/UI дизайн', 1, 36, 0),
+(37, 'Проект Дельта', 'Backend разработка', 0, 37, 0),
+(38, 'Проект Эпсилон', 'Фронтенд интеграция', 0, 38, 0),
+(41, 'Про', '', 0, 34, 0),
+(42, 'Прол', '', 1, 34, 0),
+(43, 'Большое название проекта', '', 1, 34, 1);
 
 -- --------------------------------------------------------
 
@@ -162,16 +200,13 @@ CREATE TABLE `subtasks` (
 --
 
 INSERT INTO `subtasks` (`id`, `task_id`, `name`, `description`, `responsible`, `creator_id`, `chapter_id`, `position`) VALUES
-(6, 48, 'j', 'j', 26, 25, 1, 0),
-(7, 48, 'b', 'b', 27, 25, 2, 0),
-(9, 48, 'vvvv', 'dgh', 26, 25, 1, 0),
-(10, 48, 'vb', 'bv', 26, 25, 2, 0),
-(12, 48, 'g', 'g', 26, 25, 2, 0),
-(16, 48, 'fg', 'fg', 26, 25, 1, 0),
-(17, 48, 'd', 'd', 26, 25, 1, 0),
-(18, 48, '123', '333', 26, 25, 1, 0),
-(19, 48, 'gh', 'hg', 27, 25, 1, 0),
-(20, 49, 'fg', 'hg', 27, 25, 3, 0);
+(35, 83, 'Создать форму входа', 'HTML + CSS', 34, 34, 19, 1),
+(36, 83, 'Создать форму регистрации', 'Валидация полей', 35, 34, 19, 2),
+(37, 84, 'Добавить диаграмму классов', 'UML диаграмма', 36, 35, 21, 1),
+(38, 85, 'Написать тест регистрации', 'Selenium', 37, 36, 22, 1),
+(39, 86, 'Выбрать цветовую палитру', 'Цвета интерфейса', 38, 37, 23, 1),
+(47, 92, 'Аенр', '', 35, 34, 32, 0),
+(48, 92, 'Ва', '', 35, 34, 31, 0);
 
 -- --------------------------------------------------------
 
@@ -194,13 +229,14 @@ CREATE TABLE `tasks` (
 --
 
 INSERT INTO `tasks` (`id`, `project_id`, `name`, `description`, `chapter_id`, `creator_id`, `position`) VALUES
-(43, 22, 't1', 't1', 9, 25, 2),
-(44, 22, 't2', 't2', 8, 25, 1),
-(45, 22, 't3', 't3', 9, 25, 1),
-(46, 22, 't5', 't5', 9, 25, 3),
-(47, 22, 't4', 't4', 9, 25, 0),
-(48, 24, 'dfg', 'dfg', 10, 25, 0),
-(49, 24, 'fffd', 'ffffd', 10, 25, 0);
+(83, 34, 'Собрать требования', 'Описать все функциональные модули', 26, 34, 1),
+(84, 34, 'Создать техническое задание', 'Документ с описанием требований', 27, 35, 2),
+(85, 35, 'Написать тест-кейсы', 'Покрытие основных сценариев', 29, 36, 1),
+(86, 36, 'Создать UI-компоненты', 'Дизайн кнопок, форм и карточек', 32, 37, 1),
+(87, 37, 'Реализовать REST API', 'Создать эндпоинты для клиентской части', 35, 38, 1),
+(88, 34, 'Проверка', '', 26, 34, 0),
+(91, 41, 'Прол', '', 39, 34, 0),
+(92, 41, 'Ыва', '', 39, 34, 0);
 
 -- --------------------------------------------------------
 
@@ -219,14 +255,16 @@ CREATE TABLE `task_responsible` (
 --
 
 INSERT INTO `task_responsible` (`id`, `task_id`, `user_id`) VALUES
-(45, 43, 26),
-(46, 44, 26),
-(47, 45, 26),
-(48, 46, 26),
-(49, 47, 26),
-(51, 48, 26),
-(52, 48, 27),
-(54, 49, 27);
+(1, 83, 34),
+(2, 83, 35),
+(3, 84, 36),
+(4, 85, 37),
+(5, 86, 38),
+(6, 88, 39),
+(7, 88, 34),
+(10, 91, 35),
+(22, 92, 36),
+(23, 92, 35);
 
 -- --------------------------------------------------------
 
@@ -244,18 +282,20 @@ CREATE TABLE `users` (
   `middlename` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
   `photo` blob,
-  `lastActivity` datetime DEFAULT NULL
+  `last_activity` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Дамп данных таблицы `users`
 --
 
-INSERT INTO `users` (`id`, `email`, `password`, `salt`, `lastname`, `firstname`, `middlename`, `description`, `photo`, `lastActivity`) VALUES
-(25, 'nikolay.rusanov@yandex.ru', '69b594af01f07593bf6f42602b2beb894d69e2e4fa22d3376fb4acd2af22ab16f34eec21fa082ba4108ccdb3796e8e1b42ea98312362884dfdc1290e77049a72', '691b002b5cffec0962fff6b9b20def4596bde71b72618fd826e13d7e6ad5e438', 'Rusanov', 'Nikolay', 'Alexeevich', 'novichok', NULL, '2025-06-03 01:24:41'),
-(26, 'p', '136cdc5733d2e71c557db9d378dcdaad76ae1de42c7bb2877a2ec0885cb693b8d528d6aa880afe881595e757cca1bcb134cbd753b613899a436e10b80cf78bbb', 'f619018eeac6f17fed0547d63df6973a8148efe98a275a117d456374804b5631', 'Petrov', 'Petr', 'Petrovich', NULL, NULL, '2025-06-02 14:22:40'),
-(27, 'i', '6d4bc3eb0d92831e9ce459fdf5f2c2b16df78c609b7687d0f1718304b2988eb1b97248adfdc657954817496ff316d85db3591aca2aa802dce46ea2ff07a238ac', 'a19d679df254cd8208fe6f2025a16773f46e76ff8b64d37dc93486f5fb9b65a2', 'Ivanov', 'Ivan', 'Ivanovich', NULL, NULL, '2025-05-27 23:03:17'),
-(28, 't', 'def493f524fba11be83fb93ad4a43de58bab1f471a16f8a5a785e3587c8e1dc4f3fa1015d29e8c28877ba6e7c3c7f6b622d0d3f81f7f7a1c95fd30694b786e47', '76d14ac2e203596477bd6a06481074ebf508ef573cc9dc94dabae8381d0adbed', 'test2', 'test2', 'test2', 'tester', NULL, NULL);
+INSERT INTO `users` (`id`, `email`, `password`, `salt`, `lastname`, `firstname`, `middlename`, `description`, `photo`, `last_activity`) VALUES
+(34, 'nikolay.rusanov@yandex.ru', '07640cd2018404a678e0a18f7c20adff4f9081a2651d0528d05bf642f02cd4e4c41ff49fb314bffc74621cb87b4a5e6daafd5a9d4e1213b4889f0513d1932a87', 'c8fffa8d19c6c1d96dc26f7c97ea9e40d14bd933c79f118eeaed320151849e10', 'Русанов', 'Николай', 'Алексеевич', NULL, NULL, '2025-06-14 21:11:43'),
+(35, 'anna.ivanova@example.com', 'e4baaf178d35149ab664579f62c5f7d881937cefbe51d038a620601fa1da796cda6d1e7ff0c715c1e6c3bc5ddfb99f5e2648ec989e89a78ec9326d7297a54af1', '1ac8a451031223d9b8207f9faf9fe25cb6b044d7a9f87951589261054bfa218b', 'Иванова', 'Анна', 'Петровна', NULL, NULL, NULL),
+(36, 'peter.smirnov@example.com', '31b82cd715ad514c5f2976f20103125aa8a026c32e023bf94945b24d040b7e9564850c145a3c87f7641f35dec9217a0223636ec859e2f3419f87bbe14b9bd000', 'a6107e9f8e34a4c8844c91385fed204b7d1610c71186e4f3772f361de690cfdb', 'Смирнов', 'Пётр', 'Сергеевич', NULL, NULL, NULL),
+(37, 'maria.popova@example.com', 'e2bbc2bdf2c277961705d028f3c9ff1f5f1fabd543aa02ed9b2d2672bd74bc78216c398f1d236b3484ff9429702638019f6f26279173bddf4ab9669d6a38a8d8', '303bc57b0f51b639dbeb3c8035b4a4222b1c94474746135c8322a22af96fb48f', 'Попова', 'Мария', 'Алексеевна', NULL, NULL, NULL),
+(38, 'alexander.dmitriev@example.com', 'aae25fc2689f14f6483d9e1aca447335db7aa4c0025301a7ec6847d7d885fa9631f3b2cc3a2f228ab0c1edd5703c82ff30d14da24b9b1ffce4ec8ee6140d3266', '360b4d033f4526d2d228afa44f5f97ac1c8da39420c85cb0b70cdc6a5c662b46', 'Дмитриев', 'Александр', 'Викторович', NULL, NULL, NULL),
+(39, 'dmitry.kozlov@example.com', 'be409a3c6ad44cb6d3d8ed08128cf9a5764ce809a6512b5e03031218618a024c6fdb5b814ef326f1c1b55c9b8480e02f48f681703197fb93be820bc384e4d347', '4773f137be6b1fa706f8381179aa1df431dbe04bb03ab36e81acbbb0b76aa93f', 'Козлов', 'Дмитрий', 'Николаевич', NULL, NULL, NULL);
 
 --
 -- Триггеры `users`
@@ -271,6 +311,28 @@ CREATE TRIGGER `hash_password_before_insert` BEFORE INSERT ON `users` FOR EACH R
         
         -- Хэшируем пароль с использованием соли
         SET NEW.password = SHA2(CONCAT(NEW.password, NEW.salt), 512);
+    END IF;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `hash_password_before_update` BEFORE UPDATE ON `users` FOR EACH ROW BEGIN
+    -- Проверяем, был ли изменён пароль
+    IF NEW.password != OLD.password OR OLD.password IS NULL THEN
+    
+        -- Если пароль не пустой и не NULL
+        IF NEW.password IS NOT NULL AND NEW.password != '' THEN
+        
+            -- Если соль не задана или равна '0', генерируем новую
+            IF NEW.salt IS NULL OR NEW.salt = '' OR NEW.salt = '0' THEN
+                SET NEW.salt = SHA2(UUID(), 256);
+            END IF;
+            
+            -- Хэшируем новый пароль с использованием текущей соли
+            SET NEW.password = SHA2(CONCAT(NEW.password, NEW.salt), 512);
+        
+        END IF;
+    
     END IF;
 END
 $$
@@ -314,19 +376,19 @@ ALTER TABLE `projects`
 --
 ALTER TABLE `subtasks`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `responsible` (`responsible`),
   ADD KEY `task_id` (`task_id`),
+  ADD KEY `creator_id` (`creator_id`),
   ADD KEY `subtasks_ibfk_1` (`chapter_id`),
-  ADD KEY `creator_id` (`creator_id`);
+  ADD KEY `subtasks_ibfk_2` (`responsible`);
 
 --
 -- Индексы таблицы `tasks`
 --
 ALTER TABLE `tasks`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `chapter` (`chapter_id`),
   ADD KEY `tasks_ibfk_1` (`creator_id`),
-  ADD KEY `tasks_ibfk_3` (`project_id`);
+  ADD KEY `tasks_ibfk_3` (`project_id`),
+  ADD KEY `tasks_ibfk_2` (`chapter_id`);
 
 --
 -- Индексы таблицы `task_responsible`
@@ -350,49 +412,49 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT для таблицы `chapters_subtask`
 --
 ALTER TABLE `chapters_subtask`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
 
 --
 -- AUTO_INCREMENT для таблицы `chapters_task`
 --
 ALTER TABLE `chapters_task`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=49;
 
 --
 -- AUTO_INCREMENT для таблицы `participants`
 --
 ALTER TABLE `participants`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=50;
 
 --
 -- AUTO_INCREMENT для таблицы `projects`
 --
 ALTER TABLE `projects`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
 
 --
 -- AUTO_INCREMENT для таблицы `subtasks`
 --
 ALTER TABLE `subtasks`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=49;
 
 --
 -- AUTO_INCREMENT для таблицы `tasks`
 --
 ALTER TABLE `tasks`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=50;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=93;
 
 --
 -- AUTO_INCREMENT для таблицы `task_responsible`
 --
 ALTER TABLE `task_responsible`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=55;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT для таблицы `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
 
 --
 -- Ограничения внешнего ключа сохраненных таблиц
@@ -427,8 +489,8 @@ ALTER TABLE `projects`
 -- Ограничения внешнего ключа таблицы `subtasks`
 --
 ALTER TABLE `subtasks`
-  ADD CONSTRAINT `subtasks_ibfk_1` FOREIGN KEY (`chapter_id`) REFERENCES `chapters_subtask` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  ADD CONSTRAINT `subtasks_ibfk_2` FOREIGN KEY (`responsible`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  ADD CONSTRAINT `subtasks_ibfk_1` FOREIGN KEY (`chapter_id`) REFERENCES `chapters_subtask` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `subtasks_ibfk_2` FOREIGN KEY (`responsible`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `subtasks_ibfk_3` FOREIGN KEY (`task_id`) REFERENCES `tasks` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
   ADD CONSTRAINT `subtasks_ibfk_4` FOREIGN KEY (`creator_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT;
 
@@ -437,7 +499,7 @@ ALTER TABLE `subtasks`
 --
 ALTER TABLE `tasks`
   ADD CONSTRAINT `tasks_ibfk_1` FOREIGN KEY (`creator_id`) REFERENCES `users` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  ADD CONSTRAINT `tasks_ibfk_2` FOREIGN KEY (`chapter_id`) REFERENCES `chapters_task` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  ADD CONSTRAINT `tasks_ibfk_2` FOREIGN KEY (`chapter_id`) REFERENCES `chapters_task` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `tasks_ibfk_3` FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --

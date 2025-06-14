@@ -12,5 +12,7 @@ namespace ApiStuid.Models
         [Column("is_public")]
         public bool IsPublic { get; set; }
         public int Creator { get; set; }
+        [Column("is_archive")]
+        public bool IsArchive { get; set; }
     }
 }

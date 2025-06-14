@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.IO.Compression;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -36,7 +37,8 @@ namespace ApiStuid.Controllers
                 Name = request.Name,
                 Description = request.Description,
                 IsPublic = request.IsPublic,
-                Creator = userId // Используем ID из токена
+                Creator = userId, // Используем ID из токена
+                IsArchive = false
             };
 
             _context.Projects.Add(project);
@@ -135,6 +137,29 @@ namespace ApiStuid.Controllers
             }
 
             return CreatedAtAction(nameof(GetProject), new { id = project.Id }, project);
+        }
+
+        [HttpPut("{id}/archive")]
+        public IActionResult ArchiveProject(int id)
+        {
+            var currentUserId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+            var project = _context.Projects.FirstOrDefault(p => p.Id == id);
+
+            if (project == null)
+            {
+                return NotFound(new { Message = "Проект не найден" });
+            }
+
+            if (project.Creator != currentUserId)
+            {
+                return Forbid();
+            }
+
+            project.IsArchive = !project.IsArchive;
+
+            _context.SaveChanges();
+
+            return Ok(new { Message = "Проект успешно архивирован" });
         }
 
         [HttpDelete("{id}")]
