@@ -117,7 +117,8 @@ namespace ApiStuid.Controllers
                 LastName = request.LastName,
                 MiddleName = request.MiddleName,
                 Email = request.Email,
-                Password = request.Password
+                Password = request.Password,
+                Description = "Пусто"
             };
 
             _context.Users.Add(user);
