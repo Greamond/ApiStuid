@@ -1,6 +1,7 @@
 ﻿using ApiStuid.Classes;
 using ApiStuid.DbWork;
 using ApiStuid.Models;
+using FirebaseAdmin.Messaging;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -61,6 +62,7 @@ namespace ApiStuid.Controllers
 
             // Обновление времени последней активности
             user.LastActivity = DateTime.UtcNow;
+            user.FCMToken = request.FCMToken;
             await _context.SaveChangesAsync(ct);
 
             // Генерация токена
@@ -82,6 +84,7 @@ namespace ApiStuid.Controllers
         {
             public string Email { get; set; }
             public string Password { get; set; }
+            public string FCMToken { get; set; }
         }
 
         public class LoginResult
@@ -118,7 +121,8 @@ namespace ApiStuid.Controllers
                 MiddleName = request.MiddleName,
                 Email = request.Email,
                 Password = request.Password,
-                Description = "Пусто"
+                Description = "Пусто",
+                FCMToken = request.FCMToken
             };
 
             _context.Users.Add(user);
@@ -146,6 +150,7 @@ namespace ApiStuid.Controllers
             public string MiddleName { get; set; }
             public string Email { get; set; }
             public string Password { get; set; }
+            public string FCMToken { get; set; }
         }
 
         [HttpPost("forgot-password")]

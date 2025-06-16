@@ -1,12 +1,17 @@
-﻿using ApiStuid.DbWork;
+﻿using ApiStuid.Classes;
+using ApiStuid.DbWork;
 using ApiStuid.Models;
+using FirebaseAdmin.Messaging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace ApiStuid.Controllers
@@ -37,6 +42,8 @@ namespace ApiStuid.Controllers
 
                 // Получаем текущего пользователя из токена
                 var currentUserId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value);
+                var creator = await _context.Users.FindAsync(currentUserId);
+                var creatorName = $"{creator.LastName} {creator.FirstName}";
 
                 // Проверяем, что текущий пользователь является создателем проекта
                 if (project.Creator != currentUserId)
@@ -65,6 +72,24 @@ namespace ApiStuid.Controllers
                             ProjectId = request.ProjectId,
                             UserId = participantId
                         });
+
+                        // Отправляем уведомление, если есть FCM токен
+                        if (!string.IsNullOrEmpty(user.FCMToken))
+                        {
+                            var notificationData = new Dictionary<string, string>
+                            {
+                                { "type", "project_invite" },
+                                { "projectId", project.Id.ToString() },
+                                { "projectName", project.Name },
+                                { "inviterId", creator.Id.ToString() },
+                                { "inviterName", creatorName }
+                            };
+
+                            await NotificationMobile.SendPushNotificationInvate(
+                                fcmToken: user.FCMToken,
+                                data: notificationData
+                            );
+                        }
                     }
                 }
 

@@ -9,6 +9,8 @@ using ModelsTask = ApiStuid.Models.Task;
 using ApiStuid.Models;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
+using ApiStuid.Classes;
+using System;
 
 namespace ApiStuid.Controllers
 {
@@ -70,8 +72,8 @@ namespace ApiStuid.Controllers
         public async Task<ActionResult<ModelsTask>> PostTask([FromBody] TaskCreateRequest request)
         {
             // Проверяем существование пользователя
-            var creatorExists = await _context.Users.AnyAsync(u => u.Id == request.CreatorId);
-            if (!creatorExists)
+            var creator = await _context.Users.FindAsync(request.CreatorId);
+            if (creator == null)
             {
                 return BadRequest("Указанный создатель не существует");
             }
@@ -96,33 +98,47 @@ namespace ApiStuid.Controllers
             _context.Tasks.Add(task);
             await _context.SaveChangesAsync();
 
-            _context.ChaptersSubtask.Add(new ChapterSubtask
-            {
-                Name = "Новые",
-                TaskId = task.Id
-            });
-            _context.ChaptersSubtask.Add(new ChapterSubtask
-            {
-                Name = "В работе",
-                TaskId = task.Id
-            });
-            _context.ChaptersSubtask.Add(new ChapterSubtask
-            {
-                Name = "Выполненные",
-                TaskId = task.Id
-            });
+            // Создаем стандартные подзадачи
+            _context.ChaptersSubtask.Add(new ChapterSubtask { Name = "Новые", TaskId = task.Id });
+            _context.ChaptersSubtask.Add(new ChapterSubtask { Name = "В работе", TaskId = task.Id });
+            _context.ChaptersSubtask.Add(new ChapterSubtask { Name = "Выполненные", TaskId = task.Id });
             await _context.SaveChangesAsync();
 
-            // Добавляем ответственных
-            if (request.AssigneeIds != null)
+            // Добавляем ответственных и отправляем уведомления
+            if (request.AssigneeIds != null && request.AssigneeIds.Any())
             {
+                var assignerName = $"{creator.LastName} {creator.FirstName}";
+
                 foreach (var assigneeId in request.AssigneeIds)
                 {
+                    // Проверяем существование пользователя
+                    var assignee = await _context.Users.FindAsync(assigneeId);
+                    if (assignee == null) continue;
+
+                    // Добавляем ответственного
                     _context.TaskResponsibles.Add(new TaskResponsible
                     {
                         TaskId = task.Id,
                         UserId = assigneeId
                     });
+
+                    // Отправляем уведомление, если есть FCM токен
+                    if (!string.IsNullOrEmpty(assignee.FCMToken))
+                    {
+                        try
+                        {
+                            await NotificationMobile.SendTaskAssignmentNotification(
+                                fcmToken: assignee.FCMToken,
+                                taskName: task.Name,
+                                taskId: task.Id,
+                                assignerName: assignerName
+                            );
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Ошибка при отправке уведомления пользователю {assigneeId}: {ex.Message}");
+                        }
+                    }
                 }
                 await _context.SaveChangesAsync();
             }

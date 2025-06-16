@@ -16,5 +16,7 @@ namespace ApiStuid.Models
         public byte[] Photo { get; set; }
         [Column("last_activity")]
         public DateTime? LastActivity { get; set; }
+        [Column("fcm_token")]
+        public string FCMToken{ get; set; }
     }
 }
