@@ -17,7 +17,7 @@ namespace ApiStuid.Classes
         private static bool _initialized = false;
         private static readonly object _lock = new object();
 
-        public static async System.Threading.Tasks.Task SendPushNotificationInvate(string fcmToken, Dictionary<string, string> data = null)
+        public static async System.Threading.Tasks.Task SendPushNotification(string fcmToken, Dictionary<string, string> data = null)
         {
             // Инициализация Firebase (потокобезопасная)
             InitializeFirebase();
@@ -61,35 +61,6 @@ namespace ApiStuid.Classes
             {
                 Console.WriteLine($"Главная ошибка: {ex.Message}");
             }
-        }
-
-        public static async System.Threading.Tasks.Task SendTaskAssignmentNotification(string fcmToken, string taskName, int taskId, string assignerName)
-        {
-            InitializeFirebase();
-
-            var message = new Message()
-            {
-                Token = fcmToken,
-                Data = new Dictionary<string, string>
-                {
-                    { "type", "task_assignment" },
-                    { "taskId", taskId.ToString() },
-                    { "taskName", taskName },
-                    { "assigner", assignerName }
-                },
-                Android = new AndroidConfig
-                {
-                    Priority = Priority.High,
-                    Notification = new AndroidNotification
-                    {
-                        ChannelId = "task_notifications",
-                        Sound = "default"
-                    }
-                }
-            };
-
-            string response = await FirebaseMessaging.DefaultInstance.SendAsync(message);
-            Console.WriteLine($"Уведомление отправлено: {response}");
         }
 
         private static void InitializeFirebase()

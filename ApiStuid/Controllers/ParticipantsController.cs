@@ -85,7 +85,7 @@ namespace ApiStuid.Controllers
                                 { "inviterName", creatorName }
                             };
 
-                            await NotificationMobile.SendPushNotificationInvate(
+                            await NotificationMobile.SendPushNotification(
                                 fcmToken: user.FCMToken,
                                 data: notificationData
                             );
@@ -157,6 +157,8 @@ namespace ApiStuid.Controllers
 
                 // Получаем текущего пользователя из токена
                 var currentUserId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value);
+                var creator = await _context.Users.FindAsync(currentUserId);
+                var creatorName = $"{creator.LastName} {creator.FirstName}";
 
                 // Проверяем, что текущий пользователь является создателем проекта
                 if (project.Creator != currentUserId)
@@ -174,7 +176,29 @@ namespace ApiStuid.Controllers
                     .Where(cp => !request.ParticipantIds.Contains(cp.UserId))
                     .ToList();
 
+                foreach (var participant in participantsToRemove)
+                {
+                    var user = await _context.Users.FindAsync(participant.UserId);
+                    if (user?.FCMToken != null)
+                    {
+                        var notificationDataRemove = new Dictionary<string, string>
+                        {
+                            { "type", "project_removal" },
+                            { "projectId", project.Id.ToString() },
+                            { "projectName", project.Name },
+                            { "actionById", creator.Id.ToString() },
+                            { "actionBy", creatorName }
+                        };
+                        await NotificationMobile.SendPushNotification(
+                            fcmToken: user.FCMToken,
+                            data: notificationDataRemove
+                        );
+                    }
+                }
+
                 _context.Participants.RemoveRange(participantsToRemove);
+
+
 
                 // Добавляем новых участников
                 foreach (var participantId in request.ParticipantIds)
@@ -194,6 +218,24 @@ namespace ApiStuid.Controllers
                             ProjectId = request.ProjectId,
                             UserId = participantId
                         });
+
+                        // Отправляем уведомление, если есть FCM токен
+                        if (!string.IsNullOrEmpty(user.FCMToken))
+                        {
+                            var notificationData = new Dictionary<string, string>
+                            {
+                                { "type", "project_invite" },
+                                { "projectId", project.Id.ToString() },
+                                { "projectName", project.Name },
+                                { "inviterId", creator.Id.ToString() },
+                                { "inviterName", creatorName }
+                            };
+
+                            await NotificationMobile.SendPushNotification(
+                                fcmToken: user.FCMToken,
+                                data: notificationData
+                            );
+                        }
                     }
                 }
 

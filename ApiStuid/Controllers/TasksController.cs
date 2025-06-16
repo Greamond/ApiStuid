@@ -11,6 +11,7 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
 using ApiStuid.Classes;
 using System;
+using System.Security.Claims;
 
 namespace ApiStuid.Controllers
 {
@@ -127,11 +128,16 @@ namespace ApiStuid.Controllers
                     {
                         try
                         {
-                            await NotificationMobile.SendTaskAssignmentNotification(
+                            var notificationData = new Dictionary<string, string>
+                            {
+                                { "type", "task_assignment" },
+                                { "taskId", task.ToString() },
+                                { "taskName", task.Name },
+                                { "assigner", assignerName }
+                            };
+                            await NotificationMobile.SendPushNotification(
                                 fcmToken: assignee.FCMToken,
-                                taskName: task.Name,
-                                taskId: task.Id,
-                                assignerName: assignerName
+                                data: notificationData
                             );
                         }
                         catch (Exception ex)
@@ -160,6 +166,10 @@ namespace ApiStuid.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateTask(int id, [FromBody] TaskUpdateRequest request)
         {
+            // Получаем текущего пользователя из токена
+            var currentUserId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value);
+            var creator = await _context.Users.FindAsync(currentUserId);
+
             var task = await _context.Tasks.FindAsync(id);
             if (task == null)
             {
@@ -171,24 +181,81 @@ namespace ApiStuid.Controllers
             task.Description = request.Description ?? task.Description;
             task.Chapter = request.ChapterId;
 
+            var assignerName = $"{creator.LastName} {creator.FirstName}";
+
             // Обновляем ответственных
             if (request.AssigneeIds != null)
             {
-                // Удаляем старых ответственных
+
+
+                // Текущие
                 var existingResponsibles = await _context.TaskResponsibles
                     .Where(tr => tr.TaskId == id)
                     .ToListAsync();
 
-                _context.TaskResponsibles.RemoveRange(existingResponsibles);
+                // Удаляем участников, которых нет в новом списке
+                var responsiblesToRemove = existingResponsibles
+                    .Where(cp => !request.AssigneeIds.Contains(cp.UserId))
+                    .ToList();
+
+                foreach (var responsibles in responsiblesToRemove)
+                {
+                    var user = await _context.Users.FindAsync(responsibles.UserId);
+                    if (user?.FCMToken != null)
+                    {
+                        var notificationDataRemove = new Dictionary<string, string>
+                        {
+                              { "type", "task_assignment_remove" },
+                              { "taskId", task.ToString() },
+                              { "taskName", task.Name },
+                              { "assigner", assignerName }
+                        };
+                        await NotificationMobile.SendPushNotification(
+                            fcmToken: user.FCMToken,
+                            data: notificationDataRemove
+                        );
+                    }
+                }
+
+                _context.TaskResponsibles.RemoveRange(responsiblesToRemove);
 
                 // Добавляем новых
                 foreach (var assigneeId in request.AssigneeIds)
                 {
-                    _context.TaskResponsibles.Add(new TaskResponsible
+                    // Проверяем существование пользователя
+                    var assignee = await _context.Users.FindAsync(assigneeId);
+                    if (assignee == null) continue;
+
+                    if(!existingResponsibles.Any(cp => cp.UserId == assigneeId))
                     {
-                        TaskId = id,
-                        UserId = assigneeId
-                    });
+                        _context.TaskResponsibles.Add(new TaskResponsible
+                        {
+                            TaskId = id,
+                            UserId = assigneeId
+                        });
+
+                        if (!string.IsNullOrEmpty(assignee.FCMToken))
+                        {
+                            try
+                            {
+                                var notificationData = new Dictionary<string, string>
+                            {
+                                { "type", "task_assignment" },
+                                { "taskId", task.ToString() },
+                                { "taskName", task.Name },
+                                { "assigner", assignerName }
+                            };
+                                await NotificationMobile.SendPushNotification(
+                                    fcmToken: assignee.FCMToken,
+                                    data: notificationData
+                                );
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine($"Ошибка при отправке уведомления пользователю {assigneeId}: {ex.Message}");
+                            }
+                        }
+                    }
                 }
             }
 
