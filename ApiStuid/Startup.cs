@@ -34,15 +34,15 @@ namespace ApiStuid
 
         public void ConfigureServices(IServiceCollection services)
         {
-            // Добавляем контекст базы данных
+            // Р”РѕР±Р°РІР»СЏРµРј РєРѕРЅС‚РµРєСЃС‚ Р±Р°Р·С‹ РґР°РЅРЅС‹С…
             services.AddDbContext<DatabaseContext>();
 
             services.AddScoped<IEmailService, EmailService>();
 
-            // Добавляем JwtService
+            // Р”РѕР±Р°РІР»СЏРµРј JwtService
             services.AddSingleton<JwtService>();
 
-            // Настройка JWT аутентификации
+            // РќР°СЃС‚СЂРѕР№РєР° JWT Р°СѓС‚РµРЅС‚РёС„РёРєР°С†РёРё
             var jwtKey = Configuration["Jwt:Key"];
             var jwtIssuer = Configuration["Jwt:Issuer"];
             var jwtAudience = Configuration["Jwt:Audience"];
@@ -59,15 +59,15 @@ namespace ApiStuid
                         ValidIssuer = jwtIssuer,
                         ValidAudience = jwtAudience,
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
-                        ClockSkew = TimeSpan.Zero // Убираем запас времени для expiration
+                        ClockSkew = TimeSpan.Zero // РЈР±РёСЂР°РµРј Р·Р°РїР°СЃ РІСЂРµРјРµРЅРё РґР»СЏ expiration
                     };
                 });
 
-            // Добавляем контроллеры
+            // Р”РѕР±Р°РІР»СЏРµРј РєРѕРЅС‚СЂРѕР»Р»РµСЂС‹
             services.AddControllers()
                 .AddJsonOptions(options =>
                 {
-                    // Настройки сериализации JSON (опционально)
+                    // РќР°СЃС‚СЂРѕР№РєРё СЃРµСЂРёР°Р»РёР·Р°С†РёРё JSON (РѕРїС†РёРѕРЅР°Р»СЊРЅРѕ)
                     options.JsonSerializerOptions.PropertyNamingPolicy = null;
                     options.JsonSerializerOptions.WriteIndented = true;
                 });
@@ -88,14 +88,14 @@ namespace ApiStuid
                 {
                     Title = "Stuid API",
                     Version = "v1",
-                    Description = "API для работы с пользователями и данными"
+                    Description = "API РґР»СЏ СЂР°Р±РѕС‚С‹ СЃ РїРѕР»СЊР·РѕРІР°С‚РµР»СЏРјРё Рё РґР°РЅРЅС‹РјРё"
                 });
 
-                // Добавляем поддержку JWT в Swagger
+                // Р”РѕР±Р°РІР»СЏРµРј РїРѕРґРґРµСЂР¶РєСѓ JWT РІ Swagger
                 c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
                 {
                     In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-                    Description = "Введите 'Bearer' [пробел] и ваш токен",
+                    Description = "Р’РІРµРґРёС‚Рµ 'Bearer' [РїСЂРѕР±РµР»] Рё РІР°С€ С‚РѕРєРµРЅ",
                     Name = "Authorization",
                     Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
                     Scheme = "Bearer"
@@ -135,7 +135,7 @@ namespace ApiStuid
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Stuid API V1");
-                c.RoutePrefix = "swagger"; // Можно изменить на "api/docs" и т.д.
+                c.RoutePrefix = "swagger"; // РњРѕР¶РЅРѕ РёР·РјРµРЅРёС‚СЊ РЅР° "api/docs" Рё С‚.Рґ.
             });
 
             app.UseEndpoints(endpoints =>

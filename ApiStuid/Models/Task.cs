@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ApiStuid.Models
 {
+    [Table("tasks")]
     public class Task
     {
         public int Id { get; set; }

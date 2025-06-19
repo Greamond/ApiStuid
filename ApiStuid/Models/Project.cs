@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 namespace ApiStuid.Models
 {
+    [Table("projects")]
     public class Project
     {
         public int Id { get; set; }

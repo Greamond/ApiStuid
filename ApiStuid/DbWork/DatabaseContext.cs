@@ -33,9 +33,16 @@ namespace ApiStuid.DbWork
         {
             if (!optionsBuilder.IsConfigured)
             {
+                var server = Environment.GetEnvironmentVariable("DB_HOST") ?? "mysql";
+                var port = Environment.GetEnvironmentVariable("DB_PORT") ?? "3306";
+                var database = Environment.GetEnvironmentVariable("DB_DATABASE") ?? "stuid";
+                var username = Environment.GetEnvironmentVariable("DB_USERNAME") ?? "root";
+                var password = Environment.GetEnvironmentVariable("DB_PASSWORD") ?? "root";
+
                 optionsBuilder.UseMySql(
-                    "server=localhost;database=stuid;uid=root;pwd=;",
-                    new MySqlServerVersion(new Version(8, 0, 11))
+                    $"server={server};port={port};database={database};uid={username};password={password};",
+                    new MySqlServerVersion(new Version(8, 0, 11)),
+                    options => options.EnableRetryOnFailure()
                 );
             }
         }

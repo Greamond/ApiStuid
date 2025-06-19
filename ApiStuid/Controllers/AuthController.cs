@@ -205,5 +205,20 @@ namespace ApiStuid.Controllers
             public string Email { get; set; }
             public string NewPassword { get; set; }
         }
+
+        [HttpGet("test")]
+        public async Task<ActionResult<string>> GetTest()
+        {
+            try
+            {
+                return "is work!";
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return "bad!";
+            }
+
+        }
     }
 }

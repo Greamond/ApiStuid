@@ -2,6 +2,7 @@
 
 namespace ApiStuid.Models
 {
+    [Table("subtasks")]
     public class Subtask
     {
         public int Id { get; set; }

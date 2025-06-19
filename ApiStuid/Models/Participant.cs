@@ -2,6 +2,7 @@
 
 namespace ApiStuid.Models
 {
+    [Table("participants")]
     public class Participant
     {
         public int Id { get; set; }
